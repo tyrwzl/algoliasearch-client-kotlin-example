@@ -12,6 +12,8 @@ plugins {
 
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+
+    kotlin("plugin.serialization") version "1.5.31"
 }
 
 repositories {
@@ -21,8 +23,12 @@ repositories {
 
 dependencies {
 
-    val kotlin_client_version = "1.10.0"
+    val kotlin_client_version = "1.12.1"
     val ktor_version = "1.6.4"
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+    implementation("io.ktor:ktor-client-serialization:$ktor_version")
 
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))

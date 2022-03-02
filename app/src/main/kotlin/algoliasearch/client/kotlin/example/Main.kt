@@ -5,10 +5,39 @@ package algoliasearch.client.kotlin.example
 
 import com.algolia.search.client.ClientSearch
 import com.algolia.search.model.*
-import com.algolia.search.model.indexing.Partial
+import com.algolia.search.model.search.Query
+import com.algolia.search.serialize.KeyObjectID
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+
+fun initializeIndex() {
+    val client = ClientSearch(
+        applicationID = ApplicationID("application-id"),
+        apiKey = APIKey("api-key")
+    )
+
+    val indexName = IndexName("test_index")
+
+    val index = client.initIndex(indexName)
+
+    val json = (1..1001)
+        .map {buildJsonObject {
+            put(KeyObjectID, it)
+        }}.toList()
+
+    runBlocking {
+        index.saveObjects(json)
+    }
+}
+
+
 
 fun main() {
+
+    initializeIndex()
+
     val client = ClientSearch(
         applicationID = ApplicationID("application-id"),
         apiKey = APIKey("api-key")
@@ -17,14 +46,13 @@ fun main() {
 
     val index = client.initIndex(indexName)
 
-    val partialLastModified = Partial.IncrementSet(Attribute("lastmodified"), 1593431913)
-    val partialAddUnique = Partial.AddUnique(Attribute("_tags"), "public")
-    runBlocking {
-        index.partialUpdateObjects(
-            listOf(
-                ObjectID("0") to partialLastModified,
-                ObjectID("0") to partialAddUnique,
-            )
+    val query = Query(
+        filters = (1..1001).toList().joinToString(" OR ") { "objectID:${it}" },
+        attributesToRetrieve = listOf(
+            Attribute(KeyObjectID)
         )
+    )
+    runBlocking {
+        val res = index.browseObjects(query)
     }
 }
